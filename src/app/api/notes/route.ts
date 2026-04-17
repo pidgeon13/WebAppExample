@@ -10,6 +10,11 @@
 
 import { NextRequest, NextResponse } from "next/server";
 
+// ----- Profanity filter -----
+// leo-profanity ships a built-in word list and checks for common
+// variations.  No configuration needed – just import and use.
+import leoProfanity from "leo-profanity";
+
 // ----- Type for the successful response -----
 interface NoteResponse {
   ok: true;
@@ -72,8 +77,9 @@ export async function POST(request: NextRequest) {
     };
     return NextResponse.json(errorResponse, { status: 422 });
   }
-  if(note.toLowerCase().includes("shit")) {
-    return NextResponse.json({ ok: false, error: "Naughty word" }, { status: 422 });
+  // --- Check for profanity using leo-profanity's built-in word list ---
+  if (leoProfanity.check(note)) {
+    return NextResponse.json({ ok: false, error: "Your note contains a naughty word." }, { status: 422 });
   }
   if(note.toLowerCase().includes("egg")) {
     const successResponse: NoteResponse = {
